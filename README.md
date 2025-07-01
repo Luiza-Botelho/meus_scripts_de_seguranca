@@ -98,3 +98,5 @@ Após executar todos os scripts, verifique o status dos serviços para garantir 
 🤝 Contribuição
 
 Sinta-se à vontade para abrir issues ou pull requests se tiver sugestões de melhoria. Sua contribuição é bem-vinda!
+=======
+# meus_scripts_de_seguranca
