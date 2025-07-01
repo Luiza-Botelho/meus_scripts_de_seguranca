@@ -49,7 +49,7 @@ Edite o Script do UFW (Obrigatório) ✍️:
 Abra o arquivo 03-configura_ufw.sh e substitua o valor da variável ROUTER_IP pelo IP real do seu roteador. Exemplo:
 Bash
 
-# Mude este IP para o IP real do seu roteador
+#Mude esse IP para o IP do eu roteador ou Wifi
 ROUTER_IP="SEU_IP_DO_ROTEADOR_AQUI"
 
 Você pode descobrir o IP do seu roteador usando ip route | grep default ou route -n | grep "UG".
@@ -96,7 +96,7 @@ Após executar todos os scripts, verifique o status dos serviços para garantir 
     Adaptação: Adapte as regras do UFW no 03-configura_ufw.sh conforme suas necessidades. Se você precisar de outras portas abertas para serviços específicos, adicione-as com cautela.
 
 🤝 Contribuição
-
 Sinta-se à vontade para abrir issues ou pull requests se tiver sugestões de melhoria. Sua contribuição é bem-vinda!
+
 =======
 # meus_scripts_de_seguranca
