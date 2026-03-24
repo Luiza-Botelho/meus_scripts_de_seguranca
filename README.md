@@ -1,101 +1,80 @@
 🚀 Scripts de Segurança do Sistema
 
-Este repositório contém um conjunto de scripts Bash projetados para aprimorar a segurança de um sistema Linux, combinando um sistema de varredura de vírus (c-icap e ClamAV) com uma configuração robusta de firewall (UFW). Os scripts são projetados para serem executados em uma sequência específica para garantir uma configuração limpa e eficaz.
+# 🛡️ Linux Hardening Stack: ClamAV + ICAP + UFW
 
-📦 Conteúdo do Repositório
+[![Linux](https://img.shields.io/badge/OS-Debian%20%2F%20Ubuntu-orange?logo=linux&logoColor=white)](https://www.debian.org/)
+[![Shell Script](https://img.shields.io/badge/Shell_Script-Bash-green?logo=gnu-bash&logoColor=white)](https://www.gnu.org/software/bash/)
+[![Security](https://img.shields.io/badge/Security-Hardening-red)](https://en.wikipedia.org/wiki/Hardening_(computing))
 
-    01-flush_c-icap_clamav.sh: Script para limpar e redefinir as configurações do c-icap e ClamAV.
+Este repositório fornece uma solução de **segurança em camadas** para servidores e estações de trabalho Linux. O objetivo é automatizar a higienização de configurações, a implementação de escaneamento de malware via proxy ICAP e o fechamento rigoroso de portas de rede.
 
-    02-suricada_borg_config.sh: Script principal para instalar e configurar c-icap e ClamAV para varredura de vírus.
+---
 
-    03-configura_ufw.sh: Script para configurar o firewall UFW, limitando o tráfego de entrada apenas ao roteador.
+## 🧩 Arquitetura da Solução
 
-✨ Propósito dos Scripts
+A execução sequencial destes scripts estabelece três perímetros de defesa:
 
-Esses scripts trabalham em conjunto para fornecer uma solução de segurança em camadas:
+1.  **Higienização (01-flush):** Remove resquícios de instalações mal sucedidas, garantindo que o estado do sistema seja íntegro antes da nova configuração.
+2.  **Proteção de Conteúdo (02-config):** Integra o **ClamAV** (Antivírus) com o **c-icap** (Server), permitindo a inspeção de tráfego e arquivos em nível de serviço.
+3.  **Isolamento de Rede (03-ufw):** Implementa uma política de *Default Deny*. O tráfego de entrada é restrito exclusivamente ao Gateway (Roteador), mitigando ataques de movimentação lateral e varreduras externas.
 
-    Limpeza e Preparação 🧹: O primeiro script garante que quaisquer configurações anteriores ou problemáticas do c-icap e ClamAV sejam removidas, preparando o terreno para uma nova instalação.
+---
 
-    Proteção contra Malware 🛡️: O segundo script instala e configura o c-icap (um proxy ICAP) para integrar com o ClamAV (um motor antivírus). Isso permite que seu sistema inspecione e escaneie o tráfego de rede em busca de vírus e malwares.
+## 📦 Conteúdo do Repositório
 
-    Segurança de Rede 🔒: O terceiro script configura o UFW (Uncomplicated Firewall) para criar uma barreira de segurança na rede. Ele define uma política de "negar tudo" para o tráfego de entrada e só permite conexões de entrada específicas, como SSH, vindas do seu roteador, reduzindo drasticamente a superfície de ataque.
+| Arquivo | Função |
+| :--- | :--- |
+| `01-flush_c-icap_clamav.sh` | Reset de ambiente e limpeza de configs legadas. |
+| `02-suricada_borg_config.sh`| Deploy e integração do motor ClamAV + c-icap. |
+| `03-configura_ufw.sh` | Configuração restritiva de Firewall (UFW). |
 
-📋 Pré-requisitos
+---
 
-    Sistema operacional baseado em Debian/Ubuntu (apt).
+## 🚀 Guia de Implementação
 
-    Acesso de superusuário (sudo).
+### 1. Pré-requisitos
+* Sistema baseado em **Debian/Ubuntu**.
+* Privilégios de **Root** (Sudo).
+* Conhecimento do IP do seu Gateway (ex: `192.168.1.1`).
 
-    Importante: Conhecer o endereço IP do seu roteador para configurar o UFW corretamente.
+### 2. Instalação
+```bash
+# Clone o repositório
+git clone <URL_DO_REPOSITORIO>
+cd <NOME_DO_DIRETORIO>
 
-🚀 Como Usar os Scripts
+# Atribua permissões de execução
+chmod +x *.sh
 
-É CRÍTICO EXECUTAR OS SCRIPTS NA ORDEM ESPECIFICADA.
+3. Configuração Crítica (UFW)
 
-    Clone o Repositório:
-    Bash
-
-git clone <URL_DO_SEU_REPOSITORIO>
-cd <nome_do_diretorio_clonado>
-
-Torne os Scripts Executáveis:
+Antes de executar o passo 03, edite o arquivo para definir seu IP de confiança:
 Bash
 
-chmod +x 01-flush_c-icap_clamav.sh
-chmod +x 02-suricada_borg_config.sh
-chmod +x 03-configura_ufw.sh
+nano 03-configura_ufw.sh
+# Altere: ROUTER_IP="SEU_IP_AQUI"
 
-Edite o Script do UFW (Obrigatório) ✍️:
-Abra o arquivo 03-configura_ufw.sh e substitua o valor da variável ROUTER_IP pelo IP real do seu roteador. Exemplo:
+4. Execução em Ordem
 Bash
-
-#Mude esse IP para o IP do eu roteador ou Wifi
-ROUTER_IP="SEU_IP_DO_ROTEADOR_AQUI"
-
-Você pode descobrir o IP do seu roteador usando ip route | grep default ou route -n | grep "UG".
-
-Execute os Scripts na Ordem Correta:
-
-    Passo 1: Limpeza (Opcional, mas Recomendado)
-    Bash
 
 sudo ./01-flush_c-icap_clamav.sh
-
-Este script irá redefinir as configurações de c-icap e ClamAV.
-
-Passo 2: Configuração de Varredura de Vírus
-Bash
-
 sudo ./02-suricada_borg_config.sh
+sudo ./03-configura_ufw.sh
 
-Este script instala (se necessário) e configura o c-icap com o ClamAV.
+✅ Checklist de Verificação
 
-Passo 3: Configuração do Firewall UFW
-Bash
+Após a execução, confirme se os escudos estão ativos:
 
-        sudo ./03-configura_ufw.sh
+    [ ] sudo systemctl status clamav-daemon (Ativo)
 
-        Este script configura o firewall para restringir o tráfego de entrada.
+    [ ] sudo systemctl status c-icap (Ativo)
 
-✅ Verificação Pós-Execução
+    [ ] sudo ufw status verbose (Deve listar permissões apenas para o IP do Roteador)
 
-Após executar todos os scripts, verifique o status dos serviços para garantir que tudo está funcionando como esperado:
+⚠️ Notas de Segurança (Disclaimer)
 
-    Verifique o status do ClamAV: sudo systemctl status clamav-daemon
+    Backups: Sempre realize backup de /etc/default/ufw e /etc/c-icap/ antes de rodar os scripts.
 
-    Verifique o status do c-icap: sudo systemctl status c-icap
+    Acesso: Certifique-se de ter acesso físico ou via console serial ao servidor para evitar lockout acidental durante a configuração do Firewall.
 
-    Verifique o status do UFW: sudo ufw status verbose
-
-⚠️ Considerações de Segurança
-
-    Backup: Sempre faça backup de arquivos de configuração importantes antes de executar scripts que os modificam.
-
-    Acesso Físico/Console: Em ambientes de produção, sempre tenha acesso físico ou via console ao seu servidor ao configurar o firewall, caso algo dê errado e você perca o acesso via rede.
-
-    Adaptação: Adapte as regras do UFW no 03-configura_ufw.sh conforme suas necessidades. Se você precisar de outras portas abertas para serviços específicos, adicione-as com cautela.
-
-🤝 Contribuição
-Sinta-se à vontade para abrir issues ou pull requests se tiver sugestões de melhoria. Sua contribuição é bem-vinda!
-
-=================
+Desenvolvido por Luiza Grigorowsky - Foco em Segurança Centrada no Humano.
